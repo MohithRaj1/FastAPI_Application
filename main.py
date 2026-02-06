@@ -1,51 +1,67 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+
 app = FastAPI()
+
+students=[]
 
 class Student(BaseModel):
     name: str
     email: str
-    age: str
-    Roll_number: str
-    Department: str
-    
-    class StudentResponse(BaseModel):
-        name: str
-        email: str
-        age: str
-        Roll_number: str
-        Department: str
+    age: int
+    Roll_number:str
+    Department:str
+
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
-def create_student(student: Student):
+class StudentResponse(Student):
+    id: int
+   
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+def create_student(student:Student)->StudentResponse:
+    students.append(student)
     return student
 
-def read_students(id:int):
+def get_student_by_roll_number(roll):
+    for student in students:
+        if student.Roll_number==roll:
+            return student
+    return None
+
+def read_student(roll:str)->StudentResponse:
+    return get_student_by_roll_number(roll) 
+
+
+def update_student(id:int,student:Student)->StudentResponse:
     return StudentResponse(id=id, **student.dict())
 
-    def update_student(id:int,student:Student):
-        return studentResponse(id=id, **student.dict())
+def delete_student(id:int):
+    return StudentResponse(id=id, **student.dict())
 
-        def delete_student(id:int):
-               return studentResponse(id=id, **student.dict())
-
+@app.get("/students")
+def read_students():
+    return students
 
 @app.post("/students")
-def create_student(student: Student):
+def create_student_api(student:Student):
     return create_student(student)
 
-@app.get("/students/{id}")
-def read_students(id:int):
-    return read_students(id)
+@app.get("/students/{roll}")
+def read_student_api(roll:str):
+    return read_student(roll)
 
-@app.put("/students/{id}")
-def update_student(id:int,student:Student):
-    return update_student(id,student)
+@app.put("/students/{roll}")
+def update_student_api(roll:str,student:Student):
+    return update_student(roll,student)
 
-@app.delete("/students/{id}")
-def delete_student(id:int):
+@app.delete("/students/{roll}")
+def delete_student_api(roll:str):
     return delete_student(id)
